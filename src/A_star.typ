@@ -127,7 +127,9 @@
   return (grid, none)
 }
 // DEMO AND TESTING
-#let grid = Grid(10,10) // Setting up the grid
+#let grid = Grid(10,10, 
+  startFill: (x,y)=> Node((x,y), walkable: y != 4)
+) // Setting up the grid
 #let (grid, foundPath) = findPath(grid, Node((0,0)),Node((2,5))) // Finding the path
 
 // Drawing the grid and path
