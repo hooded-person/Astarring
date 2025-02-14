@@ -81,6 +81,7 @@
 ) = {
   startNode = setG(startNode, 0)
   startNode = setH(startNode, getDistance(startNode, targetNode))
+  grid = grid.at("pushNode")(grid, startNode)
   let toSearch = (startNode,)
   let processed = ()
 
