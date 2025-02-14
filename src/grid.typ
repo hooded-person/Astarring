@@ -106,17 +106,29 @@
   return grid
 }
 // DISPLAY CODE
-#let itemGrid = Grid(width, height, start: start)
-
-#let drawGrid(..args) = {
+#let drawGrid(..args, style: (type: "square", centerOnCross: false)) = {
   let posArgs = args.pos()
   let itemGrid = posArgs.at(0)
   let path = posArgs.at(1, default: none)
+  // non-pos args
+  let style = (
+    type: args
+      .at("style",default:(:))
+      .at("type", default: "square"),
+    centerOnCross: args
+      .at("style",default:(:))
+      .at("centerOnCross", default: false),
+  )
 
   cetz.canvas({
     import cetz.draw: *
+    let corners = itemGrid.at("getCorners")(itemGrid)
+    let typesCenterCross = (
+      "square":(0, 0.5),
+      "circle":(0, 0.5),
+    )
     grid(
-      ..itemGrid.at("getCorners")(itemGrid)
+      ..corners.map(corner => return corner.map(c => c - typesCenterCross.at(style.type).at(int(style.centerOnCross)))),
     )
     for node in itemGrid.nodes {
       let nodeColor = if not node.walkable {gray
@@ -124,22 +136,34 @@
       } else if node.pos == path.first().pos {green
       } else if node.pos == path.last().pos {blue
       } else {white}
-      circle(node.pos, radius: .4, fill: nodeColor, name: "node")
+      if style.type == "circle" {
+        circle(node.pos, 
+          radius: .4, 
+          fill: nodeColor, 
+          name: "node",
+        )
+      } else {
+        rect(
+          node.pos, addV(node.pos, (1,1)), 
+          fill: nodeColor, 
+          name: "node",
+        )
+      }
       let G = node.at("G", default: calc.inf)
       let H = node.at("H", default: calc.inf)
       let F = calc.round(G + H, digits: 2)
       (G, H) = (calc.round(G, digits: 2), calc.round(H, digits: 2))
-      content("node.north-west", 
+      content( ("node.north-west",0%,"node.north-east"), 
         box(fill: black, inset: 1pt,
           text(7.5pt ,white, stroke: 0.1pt + black)[#G]
         ),
-        align: "left",
+        anchor: "north-west",
       )
-      content("node.north-east", 
+      content( ("node.north-east",0%,"node.north-west"), 
         box(fill: black, inset: 1pt,
           text(7.5pt, white, stroke: 0.1pt + black)[#H]
         ),
-        align: "right",
+        anchor: "north-east",
       )
       content("node.center", 
         text()[#F],
