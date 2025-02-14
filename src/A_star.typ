@@ -110,7 +110,7 @@
       let inSearch = toSearch.contains( node => node.pos == neighbor.pos)
       let costToNeighbor = current.G + getDistance(current, neighbor)
       
-      if (not inSearch or costToNeighbor <  getV(neigbor, "G")) {
+      if (not inSearch or costToNeighbor <  getV(neighbor, "G")) {
         neighbor = setG(neighbor, costToNeighbor)
         neighbor.at("connection") = current.at("pos")
         
