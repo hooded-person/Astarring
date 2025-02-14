@@ -1,9 +1,6 @@
 #import "@preview/cetz:0.3.2"
 #import "tools/vector.typ": add as addV, sub as subV, multiply as multiplyV, divide as divideV, pow as powV, root as rootV
 
-#let (width, height) = (9,5)
-#let start = (0,-1)
-
 #let gen1DArray(width, height, fill: (), start: (0,0)) = {
   if type(fill) != "function" {
     fill = (x,y) => return fill
@@ -43,8 +40,8 @@
   getDefNode: (pos) => Node(pos) // called when a undefined node is looked up on the grid, should return a node. When call modifies a node this node is used as base
 ) = {
   let grid = (
-    rangeX: (start.at(0), sWidth - start.at(0)),
-    rangeY: (start.at(1), sHeight - start.at(1)),
+    rangeX: (start.at(0), sWidth + start.at(0)),
+    rangeY: (start.at(1), sHeight + start.at(1)),
     getSize: (self) => {
       return (
         self.rangeX.at(1) - self.rangeX.at(0),
@@ -100,7 +97,7 @@
   )
   // constructor kinda
   let (Sx,Sy) = start
-  let array1D = gen1DArray(width, height,
+  let array1D = gen1DArray(sWidth, sHeight,
     start: start,
     fill: (x,y) => return Node((x, y), walkable: calc.rem(y,2) == 0),
   )
@@ -165,7 +162,12 @@
     }
   })
 }
+
 // Calling display code
+#let (width, height) = (9,5)
+#let start = (0,-1)
+#let itemGrid = Grid(width, height, start: start)
+
 #drawGrid(itemGrid)
 #itemGrid.at("getNeighbors")(itemGrid, 
   itemGrid.at("getNodeAt")(itemGrid, (1,1))
