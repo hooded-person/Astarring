@@ -1,4 +1,4 @@
-#import "grid.typ": Grid, Node
+#import "grid.typ": Grid, Node, drawGrid
 #import "tools/vector.typ": add as addV, sub as subV, multiply as multiplyV, divide as divideV, pow as powV, root as rootV
 
 #set page(height: auto)
@@ -69,8 +69,8 @@
   return node.G + node.H
 }
 
-/// Calculates the best path from `startNode` to `targetNode` across `grid` using the A* search algorithm.
-/// -> array
+/// Calculates the best path from `startNode` to `targetNode` across `grid` using the A* search algorithm. Returns the grid with connections as first arg and the path as second arg.
+/// -> grid, array
 #let findPath(
   /// The grid across which to find the path. -> dict
   grid, 
@@ -102,7 +102,7 @@
         currentPathTile = grid.at("getNodeAt")(grid, currentPathTile.connection)
       }
       path.push(currentPathTile)
-      return path.rev()
+      return (grid, path.rev())
     }
 
     for neighbor in grid.at("getNeighbors")(grid, current).filter(node => node.walkable and processed.find(processedNode => node.pos == processedNode.pos) == none ) {
@@ -123,12 +123,38 @@
     
     processed.push(current)
   }
-  return none
+  return (grid, none)
+}
+// DEMO AND TESTING
+#let grid = Grid(0,0) // Setting up the grid
+#let (grid, path) = findPath(grid, Node((0,0)),Node((2,5))) // Finding the path
+
+// Drawing the grid and path
+#drawGrid(grid, path)
+
+// Check for duplicate nodes for bug fixing purposes
+#let (positions, duplicates) = ((:), (:))
+#for node in grid.nodes {
+  let nodeName = node.at("getName")(node)
+  if positions.at(nodeName, default: false) {
+    duplicates.insert(nodeName, true)
+  }
+  positions.insert(nodeName, true)
 }
 
-#let grid = Grid(0,0)
-#let path = findPath(grid, Node((0,0)),Node((2,5)))
+#let dupeData = grid.nodes.filter(node => duplicates.at(node.at("getName")(node), default: false))
 
-#for part in path.map(node => node.pos) {
-  [#part\ ]
-}
+#(dupeData = dupeData.map(node => {
+  return (
+    [pos: #node.pos\ ],
+    [connection: #node.connection\ ],
+    table.cell(fill: if not node.walkable {gray} else {white})[walk: #node.walkable\ ],
+    table.cell(fill: if duplicates.at(node.at("getName")(node), default: false) {red} else {white})[name: #node.at("getName")(node)\ ],
+  )
+}))
+#show table.cell.where(y: 0): strong
+#table(columns: 4, table.header(
+    [pos], [connection], [walkable], [name],
+  ),
+  ..dupeData.flatten(),
+)

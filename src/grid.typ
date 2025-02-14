@@ -102,7 +102,7 @@
   let (Sx,Sy) = start
   let array1D = gen1DArray(width, height,
     start: start,
-    fill: (x,y) => return Node((x, y), ),
+    fill: (x,y) => return Node((x, y), walkable: calc.rem(y,2) == 0),
   )
   grid.insert("nodes", array1D)
   
@@ -111,20 +111,56 @@
 // DISPLAY CODE
 #let itemGrid = Grid(width, height, start: start)
 
-#let drawGrid(itemGrid) = {
+#let drawGrid(..args) = {
+  let posArgs = args.pos()
+  let itemGrid = posArgs.at(0)
+  let path = posArgs.at(1, default: none)
+
   cetz.canvas({
     import cetz.draw: *
     grid(
       ..itemGrid.at("getCorners")(itemGrid)
     )
     for node in itemGrid.nodes {
-      circle(node.pos, radius: .4, fill: white)
-      if node.at("connection") != none and node.pos != node.at("connection") {
+      let nodeColor = if not node.walkable {gray
+      } else if path == none {white
+      } else if node.pos == path.first().pos {green
+      } else if node.pos == path.last().pos {blue
+      } else {white}
+      circle(node.pos, radius: .4, fill: nodeColor, name: "node")
+      let G = node.at("G", default: calc.inf)
+      let H = node.at("H", default: calc.inf)
+      let F = calc.round(G + H, digits: 2)
+      (G, H) = (calc.round(G, digits: 2), calc.round(H, digits: 2))
+      content("node.north-west", 
+        box(fill: black, inset: 1pt,
+          text(7.5pt ,white, stroke: 0.1pt + black)[#G]
+        ),
+        align: "left",
+      )
+      content("node.north-east", 
+        box(fill: black, inset: 1pt,
+          text(7.5pt, white, stroke: 0.1pt + black)[#H]
+        ),
+        align: "right",
+      )
+      content("node.center", 
+        text()[#F],
+      )
+      if path == none and node.at("connection") != none and node.pos != node.at("connection") {
         let nodeName = node.at("getName")(node)
         on-layer(1, line(node.pos, node.at("connection"), 
           stroke: red,
           mark: (end: (symbol: ">")),
         ))
+      } else if path != none and path.find(pathNode => pathNode.pos == node.pos) != none {
+        let pathPosition = path.position(pathNode => pathNode.pos == node.pos)
+        if pathPosition + 1 < path.len() {
+          on-layer(1, line(node.pos, path.at(pathPosition + 1).pos, 
+            stroke: red,
+            mark: (end: (symbol: ">")),
+          ))
+        }
       }
     }
   })
