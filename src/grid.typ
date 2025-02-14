@@ -73,7 +73,7 @@
     pushNode: (self, node) => {
       let i = self.at("nodes").position(sNode => sNode.pos == node.pos)
       if i != none {
-        self.at("nodes").insert(i, node)
+        self.at("nodes").at(i) = node
       } else {
         self = self.at("newNode")(self, node)
       }
