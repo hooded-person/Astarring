@@ -152,11 +152,16 @@
     [connection: #node.connection\ ],
     table.cell(fill: if not node.walkable {gray} else {white})[walk: #node.walkable\ ],
     table.cell(fill: if duplicates.at(node.at("getName")(node), default: false) {red} else {white})[name: #node.at("getName")(node)\ ],
+    [#node.at("G", default: calc.inf)],
+    [#node.at("H", default: calc.inf)],
+    [#calc.round(digits: 2,
+      node.at("F", default: calc.inf)
+      )]
   )
 }))
 #show table.cell.where(y: 0): strong
-#table(columns: 4, table.header(
-    [pos], [connection], [walkable], [name],
+#table(columns: (auto,auto,auto,auto,30pt,30pt,30pt), table.header(
+    [pos], [connection], [walkable], [name],[G],[H],[F]
   ),
   ..dupeData.flatten(),
 )
