@@ -1,0 +1,1 @@
+#import "simple.typ": straightPath as findPath
