@@ -126,11 +126,11 @@
   return (grid, none)
 }
 // DEMO AND TESTING
-#let grid = Grid(0,0) // Setting up the grid
-#let (grid, path) = findPath(grid, Node((0,0)),Node((2,5))) // Finding the path
+#let grid = Grid(10,10) // Setting up the grid
+#let (grid, foundPath) = findPath(grid, Node((0,0)),Node((2,5))) // Finding the path
 
 // Drawing the grid and path
-#drawGrid(grid, path)
+#drawGrid(grid, foundPath)
 
 // Check for duplicate nodes for bug fixing purposes
 #let (positions, duplicates) = ((:), (:))
@@ -142,8 +142,9 @@
   positions.insert(nodeName, true)
 }
 
-#let dupeData = grid.nodes.filter(node => duplicates.at(node.at("getName")(node), default: false))
+#let dupeData = grid.nodes
 
+#(dupeData = dupeData.filter(node => duplicates.at(node.at("getName")(node), default: false)))
 #(dupeData = dupeData.map(node => {
   return (
     [pos: #node.pos\ ],
